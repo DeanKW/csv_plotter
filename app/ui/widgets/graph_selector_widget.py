@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QPushButton
-from generic_widgets import LabeledInput
+from ui.widgets.generic_widgets import LabeledInput
 
 class GraphSelectorWidget(QWidget):
     def __init__(self, data_model, parent=None):
@@ -66,6 +66,11 @@ class GraphSelectorWidget(QWidget):
         self.graph_options_widget.setVisible(choice in ["Scatter", "Line", "Bar", "Histogram"])
 
 if __name__ == "__main__":
+    # This is a test script to run the GraphSelectorWidget independently
+    # and visualize its functionality without the full application context.
+
+    # To run this script, use the command:
+    # python -m app.ui.widgets.graph_selector_widget
 
     import sys
     import os
