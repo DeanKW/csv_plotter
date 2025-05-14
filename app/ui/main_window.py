@@ -74,10 +74,22 @@ class MainWindow(QMainWindow):
         self.setMenuBar(menu_bar)
 
     def load_file(self):
-        pass
+        """Open a file dialog to load a CSV file."""
+        options = QFileDialog.Options()
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "Open CSV File", "", "CSV Files (*.csv);;All Files (*)", options=options
+        )
+        if file_path:
+            self.data_model.load_csv(file_path)
+            print(f"Loaded file: {file_path}")
+
+            self.graph_selector_widget.fill_graph_options_from_data()  # Update graph options based on new data
+
+            # Update filter widget with new data
 
     def apply_filters_and_graph(self):
         pass
+ 
 
     def add_graph_tab(self, title="Graph"):
         """Add a new tab for displaying a graph."""
@@ -90,7 +102,7 @@ class MainWindow(QMainWindow):
         QMessageBox.about(
             self,
             "About CSV Plotter",
-            "CSV Plotter\nVersion 1e-9\n\n"
+            "CSV Plotter\nVersion 1.0\n\nA tool for visualizing CSV data with live filtering and plotting."
         )
 
 

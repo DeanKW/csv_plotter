@@ -24,6 +24,7 @@ class GraphSelectorWidget(QWidget):
         self.graph_options_layout = QVBoxLayout(self.graph_options_widget)
 
         self._add_plot_options()
+        self.fill_graph_options_from_data()
         self.update_graph_options()  # Initialize with the default graph type
 
         # Connect graph type selection to update options
@@ -52,6 +53,22 @@ class GraphSelectorWidget(QWidget):
         # Histogram plot options
         self.column_combo = LabeledInput("Column:", QComboBox())
         self.graph_options_layout.addWidget(self.column_combo)
+
+    def fill_graph_options_from_data(self):
+        """Fill the graph options based on the loaded data."""
+        if self.data_model.raw_df is not None:
+            columns = self.data_model.raw_df.columns
+            self.x_axis_combo.input.clear()
+            self.y_axis_combo.input.clear()
+            self.category_combo.input.clear()
+            self.value_combo.input.clear()
+            self.column_combo.input.clear()
+
+            self.x_axis_combo.input.addItems(columns)
+            self.y_axis_combo.input.addItems(columns)
+            self.category_combo.input.addItems(columns)
+            self.value_combo.input.addItems(columns)
+            self.column_combo.input.addItems(columns)
 
     def update_graph_options(self):
         """Update the graph options widget based on the selected graph type."""
