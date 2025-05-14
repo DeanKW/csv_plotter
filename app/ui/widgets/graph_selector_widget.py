@@ -23,9 +23,60 @@ class GraphSelectorWidget(QWidget):
         self.graph_options_widget = QWidget()
         self.graph_options_layout = QVBoxLayout(self.graph_options_widget)
 
-        layout.addLayout(graph_type_layout)
+        self._add_plot_options()
+        self.update_graph_options()  # Initialize with the default graph type
 
-    
+        # Connect graph type selection to update options
+        self.graph_type_combo.currentTextChanged.connect(self.update_graph_options)
+
+        layout.addLayout(graph_type_layout)
+        layout.addWidget(self.graph_options_widget)
+
+    def _add_plot_options(self):
+        """Add plot options."""
+        # Scatter and line plot options
+        self.x_axis_label = QLabel("X-Axis:")
+        self.x_axis_combo = QComboBox()
+        self.y_axis_label = QLabel("Y-Axis:")
+        self.y_axis_combo = QComboBox()
+
+        self.graph_options_layout.addWidget(self.x_axis_label)
+        self.graph_options_layout.addWidget(self.x_axis_combo)
+        self.graph_options_layout.addWidget(self.y_axis_label)
+        self.graph_options_layout.addWidget(self.y_axis_combo)
+
+        # Bar plot options
+        self.category_label = QLabel("Category:")
+        self.category_combo = QComboBox()
+        self.value_combo_label = QLabel("Value:")
+        self.value_combo = QComboBox()
+        self.graph_options_layout.addWidget(self.category_label)
+        self.graph_options_layout.addWidget(self.category_combo)
+        self.graph_options_layout.addWidget(self.value_combo_label)
+        self.graph_options_layout.addWidget(self.value_combo)
+
+        # Histogram plot options
+        self.column_combo_label = QLabel("Column:")
+        self.column_combo = QComboBox()
+        self.graph_options_layout.addWidget(self.column_combo_label)
+        self.graph_options_layout.addWidget(self.column_combo)
+
+    def update_graph_options(self):
+        """Update the graph options widget based on the selected graph type."""
+        choice = self.graph_type_combo.currentText()
+        self.x_axis_label.setVisible(choice in ["Scatter", "Line"])
+        self.x_axis_combo.setVisible(choice in ["Scatter", "Line"])
+        self.y_axis_label.setVisible(choice in ["Scatter", "Line"])
+        self.y_axis_combo.setVisible(choice in ["Scatter", "Line"])
+
+        self.category_label.setVisible(choice == "Bar")
+        self.category_combo.setVisible(choice == "Bar")
+        self.value_combo_label.setVisible(choice == "Bar")
+        self.value_combo.setVisible(choice == "Bar")
+
+        self.column_combo_label.setVisible(choice == "Histogram")
+        self.column_combo.setVisible(choice == "Histogram")
+        self.graph_options_widget.setVisible(choice in ["Scatter", "Line", "Bar", "Histogram"])
 
 if __name__ == "__main__":
 
