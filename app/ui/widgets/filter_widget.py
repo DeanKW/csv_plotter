@@ -135,8 +135,29 @@ class FilterWidget(QWidget):
 
     def apply_filters(self):
         """Apply all filters to the data model."""
-        print('STUB: Applying filters to data model')
+        combined_filters = {}
+        for filter_widgets in self.filters:
+            column_selector = filter_widgets["column_selector"]
+            filter_options_layout = filter_widgets["filter_options_layout"]
+            selected_column = column_selector.currentText()
 
+            # I kind of hate that these are hardcoded, but meh.
+            if pd.api.types.is_numeric_dtype(self.data_model.raw_df[selected_column]):
+                min_value = filter_options_layout.itemAt(1).widget().text()
+                max_value = filter_options_layout.itemAt(3).widget().text()
+                if min_value and max_value:
+                    combined_filters[selected_column] = (float(min_value), float(max_value))
+            elif pd.api.types.is_categorical_dtype(self.data_model.raw_df[selected_column]):# or self.data_model.raw_df[selected_column].dtype == object:
+                category_list = filter_options_layout.itemAt(1).widget()
+                selected_categories = [
+                    category_list.item(i).text() for i in range(category_list.count())
+                    if category_list.item(i).checkState() == Qt.Checked
+                ]
+                if selected_categories:
+                    combined_filters[selected_column] = selected_categories
+
+        # In the future, I'm sure this will need some try/catching
+        self.data_model.apply_filters(combined_filters)
 
 if __name__ == "__main__":
     import sys
