@@ -3,13 +3,11 @@ app_path='/home/dean/Documents/gitRepos/csv_plotter/app'
 plotter_path='/home/dean/Documents/gitRepos/csv_plotter'
 # Add the project root (one level up from /tests) to sys.path
 sys.path.append(plotter_path)
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QSplitter, QTabWidget, QMenuBar, QAction, QMessageBox, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QSplitter, QTabWidget, QMenuBar, QAction, QMessageBox, QFileDialog, QStackedWidget
 from PyQt5.QtCore import Qt
 from app.model.data_model import DataModel
 from app.ui.widgets.filter_widget import FilterWidget
-from app.ui.widgets.graph_selector_widget import GraphSelectorWidget
-from app.ui.widgets.plot_widget import PlotWidget
-
+from app.ui.graph_page import GraphPage
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -30,10 +28,6 @@ class MainWindow(QMainWindow):
         main_widget = QWidget()
         main_layout = QVBoxLayout(main_widget)
 
-        # Toolbar for graph selection
-        self.graph_selector_widget = GraphSelectorWidget(self.data_model)
-        self.graph_selector_widget.graph_button.clicked.connect(self.apply_filters_and_graph)
-
         # Splitter for filter and graph area
         splitter = QSplitter(Qt.Horizontal)
 
@@ -41,15 +35,19 @@ class MainWindow(QMainWindow):
         self.filter_widget = FilterWidget(self.data_model)
         splitter.addWidget(self.filter_widget)
 
-        # Center: Graph area with tabs
-        self.graph_tabs = QTabWidget()
-        splitter.addWidget(self.graph_tabs)
+        # QStackedWidget for pages
+        self.stacked_widget = QStackedWidget()
+        self.graph_page = GraphPage(self.data_model)
+        self.stacked_widget.addWidget(self.graph_page)
+        splitter.addWidget(self.stacked_widget)
 
-        # Add splitter and toolbar to main layout
-        main_layout.addWidget(self.graph_selector_widget)
+        # Add splitter to main layout
         main_layout.addWidget(splitter)
 
         self.setCentralWidget(main_widget)
+
+        # Default to graph page
+        self.stacked_widget.setCurrentWidget(self.graph_page)
 
     def create_menu_bar(self):
         """Create the menu bar with File and Help menus."""
@@ -83,41 +81,24 @@ class MainWindow(QMainWindow):
             self.data_model.load_csv(file_path)
             print(f"Loaded file: {file_path}")
 
-            self.graph_selector_widget.fill_graph_options_from_data()  # Update graph options based on new data
-
-            # Update filter widget with new data
+            self.graph_page.graph_selector_widget.fill_graph_options_from_data()  # Update graph options based on new data
 
     def apply_filters_and_graph(self):
         """Apply filters to the data and update the plots."""
-        graph_type = self.graph_selector_widget.graph_type
-        x_col = self.graph_selector_widget.x_axis
-        y_col = self.graph_selector_widget.y_axis
+        graph_type = self.graph_page.graph_selector_widget.graph_type
+        x_col = self.graph_page.graph_selector_widget.x_axis
+        y_col = self.graph_page.graph_selector_widget.y_axis
         filtered_data = self.data_model.get_filtered_data()
 
-        if graph_type in ["Scatter", "Line"]:
-            current_tab = self.add_graph_tab(f"{graph_type} Plot")
-            current_tab.plot_data(filtered_data, plot_type=graph_type.lower(), x_col=x_col, y_col=y_col)
-        elif graph_type == "Bar":
-            current_tab = self.add_graph_tab(f"{graph_type} Plot")
-            current_tab.plot_data(filtered_data, plot_type="bar", x_col=x_col, y_col=y_col)
-        elif graph_type == "Histogram":
-            current_tab = self.add_graph_tab(f"{graph_type} Plot")
-            current_tab.plot_data(filtered_data, plot_type="histogram", x_col=x_col)
-        else:
-            QMessageBox.warning(self, f"{graph_type} is not yet implemented")
-
-    def add_graph_tab(self, title="Graph"):
-        """Add a new tab for displaying a graph."""
-        plot_widget = PlotWidget()
-        self.graph_tabs.addTab(plot_widget, title)
-        return plot_widget
+        # TBD: Do we want to update plot?
+        #self.graph_page.plot_widget.plot_data(filtered_data, plot_type=graph_type.lower(), x_col=x_col, y_col=y_col)
 
     def show_about_dialog(self):
         """Show an about dialog."""
         QMessageBox.about(
             self,
             "About CSV Plotter",
-            "CSV Plotter\nVersion 1.0\n\nA tool for visualizing CSV data with live filtering and plotting."
+            "CSV Plotter\nVersion 0.1.x\n\nA tool for visualizing CSV data with live filtering and plotting."
         )
 
 
