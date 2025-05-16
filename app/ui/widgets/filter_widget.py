@@ -72,7 +72,53 @@ class FilterWidget(QWidget):
         print('STUB: Removing filter at row:', row)
 
     def update_filter_options(self, row):
-        print('STUB: Updating filter options for row:', row)
+        # Might need to check if row is valid in the future
+        #if row < len(self.filters):
+        filter_widgets = self.filters[row]
+        column_selector = filter_widgets["column_selector"]
+        filter_options_layout = filter_widgets["filter_options_layout"]
+
+        # Clear existing filter options
+
+        # Count() returns the number of items in the layout
+        # This is equivalent to len(filter_options_layout)
+        # Using count because it's the PyQt way to get the number of items in a layout
+        while filter_options_layout.count():
+            # takeAt() returns the item at the given index and removes it from the layout
+            child = filter_options_layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+
+        selected_column = column_selector.currentText()
+        if selected_column:
+            column_data = self.data_model.raw_df[selected_column]
+            if pd.api.types.is_numeric_dtype(column_data):
+                self.add_numeric_filter_options(filter_options_layout)
+            elif pd.api.types.is_categorical_dtype(column_data) or column_data.dtype == object:
+                self.add_categorical_filter_options(filter_options_layout, column_data)
+            # Add more data type checks as needed
+
+    def add_numeric_filter_options(self, layout):
+        """Add filter options for numeric columns."""
+        layout.addWidget(QLabel("Min Value:"))
+        min_value_input = QLineEdit()
+        layout.addWidget(min_value_input)
+
+        layout.addWidget(QLabel("Max Value:"))
+        max_value_input = QLineEdit()
+        layout.addWidget(max_value_input)
+
+    def add_categorical_filter_options(self, layout, column_data):
+        """Add filter options for categorical columns."""
+        layout.addWidget(QLabel("Select Categories:"))
+        category_list = QListWidget()
+        category_list.setSelectionMode(QListWidget.MultiSelection)
+        unique_values = column_data.dropna().unique()
+        for value in unique_values:
+            item = QListWidgetItem(str(value))
+            item.setCheckState(Qt.Unchecked)
+            category_list.addItem(item)
+        layout.addWidget(category_list)
 
     def apply_filters(self):
         """Apply all filters to the data model."""
