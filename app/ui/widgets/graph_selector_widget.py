@@ -82,6 +82,30 @@ class GraphSelectorWidget(QWidget):
         self.column_combo.setVisible(choice == "Histogram")
         self.graph_options_widget.setVisible(choice in ["Scatter", "Line", "Bar", "Histogram"])
 
+    @property
+    def graph_type(self):
+        return self.graph_type_combo.currentText()
+
+    @property
+    def x_axis(self):
+        gt = self.graph_type
+        if gt in ["Scatter", "Line"]:
+            return self.x_axis_combo.input.currentText()
+        elif gt == "Bar":
+            return self.category_combo.input.currentText()
+        elif gt == "Histogram":
+            return self.column_combo.input.currentText()
+        return None
+
+    @property
+    def y_axis(self):
+        gt = self.graph_type
+        if gt in ["Scatter", "Line"]:
+            return self.y_axis_combo.input.currentText()
+        elif gt == "Bar":
+            return self.value_combo.input.currentText()
+        return None
+
 if __name__ == "__main__":
     # This is a test script to run the GraphSelectorWidget independently
     # and visualize its functionality without the full application context.

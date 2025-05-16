@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QLineEdit
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QLineEdit, QComboBox, QCheckBox, QSlider
 from PyQt5.QtCore import Qt
 
 class LabeledInput(QWidget):

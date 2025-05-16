@@ -88,8 +88,23 @@ class MainWindow(QMainWindow):
             # Update filter widget with new data
 
     def apply_filters_and_graph(self):
-        pass
- 
+        """Apply filters to the data and update the plots."""
+        graph_type = self.graph_selector_widget.graph_type
+        x_col = self.graph_selector_widget.x_axis
+        y_col = self.graph_selector_widget.y_axis
+        filtered_data = self.data_model.get_filtered_data()
+
+        if graph_type in ["Scatter", "Line"]:
+            current_tab = self.add_graph_tab(f"{graph_type} Plot")
+            current_tab.plot_data(filtered_data, plot_type=graph_type.lower(), x_col=x_col, y_col=y_col)
+        elif graph_type == "Bar":
+            current_tab = self.add_graph_tab(f"{graph_type} Plot")
+            current_tab.plot_data(filtered_data, plot_type="bar", x_col=x_col, y_col=y_col)
+        elif graph_type == "Histogram":
+            current_tab = self.add_graph_tab(f"{graph_type} Plot")
+            current_tab.plot_data(filtered_data, plot_type="histogram", x_col=x_col)
+        else:
+            QMessageBox.warning(self, f"{graph_type} is not yet implemented")
 
     def add_graph_tab(self, title="Graph"):
         """Add a new tab for displaying a graph."""
