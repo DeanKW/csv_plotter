@@ -2,6 +2,18 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QComboBox, QTableWidge
     QTableWidgetItem, QGroupBox, QFormLayout, QScrollArea, QListWidget
 import pandas as pd
 
+# TODO: When less lazy, move this to a utils file
+def clear_layout(layout):
+    """Recursively clear all widgets and layouts in the given layout."""
+    while layout.count():
+        item = layout.takeAt(0)
+        widget = item.widget()
+        if widget:
+            widget.setParent(None)
+        sub_layout = item.layout()
+        if sub_layout:
+            clear_layout(sub_layout)
+
 class StatisticsPage(QWidget):
     def __init__(self, data_model, parent=None):
         super().__init__(parent)
@@ -26,41 +38,30 @@ class StatisticsPage(QWidget):
 
         self.update_stats()
 
-    def clear_stats(self, layout=None):
-        """Recursively clear all widgets and layouts in the given layout."""
-        if layout is None:
-            layout = self.stats_layout
-        while layout.count():
-            item = layout.takeAt(0)
-
-            # Remove widgets if present
-            widget = item.widget()
-            if widget is not None:
-                widget.setParent(None)
-
-            # Remove nested layouts
-            sub_layout = item.layout()
-            if sub_layout is not None:
-                self.clear_stats(sub_layout)
-
     def update_stats(self):
-        self.clear_stats()
+        clear_layout(self.stats_layout)
         col = self.column_selector.currentText()
         df = self.data_model.get_filtered_data()
 
         if col and col in df.columns:
             series = df[col]
             if pd.api.types.is_numeric_dtype(series):
-                self.stats_layout.addRow("Mean:", QLabel(str(series.mean())))
-                self.stats_layout.addRow("Median:", QLabel(str(series.median())))
-                self.stats_layout.addRow("Std Dev:", QLabel(str(series.std())))
-                self.stats_layout.addRow("Min:", QLabel(str(series.min())))
-                self.stats_layout.addRow("Max:", QLabel(str(series.max())))
-                self.stats_layout.addRow("Count:", QLabel(str(series.count())))
+                self._display_numeric_stats(series)
             elif pd.api.types.is_categorical_dtype(series) or series.dtype == object:
-                value_counts = series.value_counts()
-                for val, count in value_counts.items():
-                    self.stats_layout.addRow(str(val), QLabel(str(count)))
+                self._display_categorical_stats(series)
+
+    def _display_numeric_stats(self, series):
+        self.stats_layout.addRow("Mean:", QLabel(str(series.mean())))
+        self.stats_layout.addRow("Median:", QLabel(str(series.median())))
+        self.stats_layout.addRow("Std Dev:", QLabel(str(series.std())))
+        self.stats_layout.addRow("Min:", QLabel(str(series.min())))
+        self.stats_layout.addRow("Max:", QLabel(str(series.max())))
+        self.stats_layout.addRow("Count:", QLabel(str(series.count())))
+
+    def _display_categorical_stats(self, series):
+        value_counts = series.value_counts()
+        for val, count in value_counts.items():
+            self.stats_layout.addRow(str(val), QLabel(str(count)))
 
     
     def refresh_columns(self):
