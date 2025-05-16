@@ -69,9 +69,22 @@ class FilterWidget(QWidget):
 
     def remove_filter(self, row):
         """Remove a filter section."""
-        print('STUB: Removing filter at row:', row)
+        if row < len(self.filters):
+            filter_widgets = self.filters.pop(row)
+            for widget in filter_widgets.values():
+                widget.deleteLater()
+            self.rebuild_filter_layout()
+
+    def rebuild_filter_layout(self):
+        """Rebuild the filter layout after a filter is removed."""
+        for i, filter_widgets in enumerate(self.filters):
+            self.filter_layout.addWidget(filter_widgets["column_selector"], i, 0)
+            self.filter_layout.addWidget(filter_widgets["filter_options"], i, 1)
+            self.filter_layout.addWidget(filter_widgets["logical_operator"], i, 2)
+            self.filter_layout.addWidget(filter_widgets["remove_button"], i, 3)
 
     def update_filter_options(self, row):
+        """Update filter options based on the selected column's data type."""
         # Might need to check if row is valid in the future
         #if row < len(self.filters):
         filter_widgets = self.filters[row]
@@ -123,6 +136,7 @@ class FilterWidget(QWidget):
     def apply_filters(self):
         """Apply all filters to the data model."""
         print('STUB: Applying filters to data model')
+
 
 if __name__ == "__main__":
     import sys
