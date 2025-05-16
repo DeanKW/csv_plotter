@@ -9,6 +9,7 @@ from app.model.data_model import DataModel
 from app.ui.widgets.filter_widget import FilterWidget
 from app.ui.graph_page import GraphPage
 from app.ui.table_page import TablePage
+from app.ui.correlation_page import CorrelationPage
 
 
 class MainWindow(QMainWindow):
@@ -41,8 +42,10 @@ class MainWindow(QMainWindow):
         self.stacked_widget = QStackedWidget()
         self.graph_page = GraphPage(self.data_model)
         self.table_page = TablePage(self.data_model)
+        self.correlation_page = CorrelationPage(self.data_model)
         self.stacked_widget.addWidget(self.graph_page)
         self.stacked_widget.addWidget(self.table_page)
+        self.stacked_widget.addWidget(self.correlation_page)
         splitter.addWidget(self.stacked_widget)
 
         # Add splitter to main layout
@@ -55,7 +58,11 @@ class MainWindow(QMainWindow):
 
         # Connect filter apply to table update
         self.filter_widget.apply_filter_button.clicked.connect(self.table_page.update_table)
+        self.filter_widget.apply_filter_button.clicked.connect(self.correlation_page.refresh_correlation)
+
         self.filter_widget.reset_filters_callbacks.append(self.table_page.update_table)
+        self.filter_widget.reset_filters_callbacks.append(self.correlation_page.refresh_correlation)
+
         # Maybe we want to connect it to the graph page too
 
 
@@ -82,6 +89,9 @@ class MainWindow(QMainWindow):
         table_action = QAction("Table Page", self)
         table_action.triggered.connect(lambda: self.stacked_widget.setCurrentWidget(self.table_page))
         view_menu.addAction(table_action)
+        corr_action = QAction("Correlation / Analysis / Insights Page", self)
+        corr_action.triggered.connect(lambda: self.stacked_widget.setCurrentWidget(self.correlation_page))
+        view_menu.addAction(corr_action)
 
         # Help menu
         help_menu = menu_bar.addMenu("Help")
@@ -103,6 +113,7 @@ class MainWindow(QMainWindow):
 
             self.graph_page.graph_selector_widget.fill_graph_options_from_data()  # Update graph options based on new data
             self.table_page.update_table()  # Update table with new data
+            self.correlation_page.refresh_correlation()
 
     def apply_filters_and_graph(self):
         """Apply filters to the data and update the plots."""
