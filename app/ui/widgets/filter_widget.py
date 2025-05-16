@@ -37,6 +37,7 @@ class FilterWidget(QWidget):
         layout.addWidget(self.apply_filter_button)
 
         layout.addStretch()
+        self.reset_filters_callbacks = []
 
     def add_filter(self):
         """Add a new filter section."""
@@ -172,7 +173,12 @@ class FilterWidget(QWidget):
             child = self.filter_layout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
+
         self.data_model.reset_filters()
+
+        # Call any registered reset filters callbacks
+        for cb in getattr(self, 'reset_filters_callbacks', []):
+            cb()
 
 if __name__ == "__main__":
     import sys

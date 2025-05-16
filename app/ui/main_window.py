@@ -8,6 +8,8 @@ from PyQt5.QtCore import Qt
 from app.model.data_model import DataModel
 from app.ui.widgets.filter_widget import FilterWidget
 from app.ui.graph_page import GraphPage
+from app.ui.table_page import TablePage
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -38,7 +40,9 @@ class MainWindow(QMainWindow):
         # QStackedWidget for pages
         self.stacked_widget = QStackedWidget()
         self.graph_page = GraphPage(self.data_model)
+        self.table_page = TablePage(self.data_model)
         self.stacked_widget.addWidget(self.graph_page)
+        self.stacked_widget.addWidget(self.table_page)
         splitter.addWidget(self.stacked_widget)
 
         # Add splitter to main layout
@@ -49,8 +53,15 @@ class MainWindow(QMainWindow):
         # Default to graph page
         self.stacked_widget.setCurrentWidget(self.graph_page)
 
+        # Connect filter apply to table update
+        self.filter_widget.apply_filter_button.clicked.connect(self.table_page.update_table)
+        self.filter_widget.reset_filters_callbacks.append(self.table_page.update_table)
+        # Maybe we want to connect it to the graph page too
+
+
     def create_menu_bar(self):
-        """Create the menu bar with File and Help menus."""
+        """Create the menu bar with File, View, and Help menus."""
+
         menu_bar = QMenuBar(self)
 
         # File menu
@@ -62,6 +73,15 @@ class MainWindow(QMainWindow):
         exit_action = QAction("Exit", self)
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
+
+        # View menu for switching pages
+        view_menu = menu_bar.addMenu("View")
+        graph_action = QAction("Graph Page", self)
+        graph_action.triggered.connect(lambda: self.stacked_widget.setCurrentWidget(self.graph_page))
+        view_menu.addAction(graph_action)
+        table_action = QAction("Table Page", self)
+        table_action.triggered.connect(lambda: self.stacked_widget.setCurrentWidget(self.table_page))
+        view_menu.addAction(table_action)
 
         # Help menu
         help_menu = menu_bar.addMenu("Help")
@@ -82,6 +102,7 @@ class MainWindow(QMainWindow):
             print(f"Loaded file: {file_path}")
 
             self.graph_page.graph_selector_widget.fill_graph_options_from_data()  # Update graph options based on new data
+            self.table_page.update_table()  # Update table with new data
 
     def apply_filters_and_graph(self):
         """Apply filters to the data and update the plots."""
@@ -91,7 +112,10 @@ class MainWindow(QMainWindow):
         filtered_data = self.data_model.get_filtered_data()
 
         # TBD: Do we want to update plot?
+        # If so, we need an update function in the graph page
         #self.graph_page.plot_widget.plot_data(filtered_data, plot_type=graph_type.lower(), x_col=x_col, y_col=y_col)
+
+        # No need to call a table update function, as it is auto-updated because we are using a Model/View approach
 
     def show_about_dialog(self):
         """Show an about dialog."""
