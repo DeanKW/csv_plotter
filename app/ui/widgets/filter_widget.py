@@ -26,6 +26,11 @@ class FilterWidget(QWidget):
         self.add_filter_button.clicked.connect(self.add_filter)
         layout.addWidget(self.add_filter_button)
 
+        # Reset filters button
+        self.reset_filter_button = QPushButton("Reset Filters")
+        self.reset_filter_button.clicked.connect(self.reset_filters)
+        layout.addWidget(self.reset_filter_button)
+
         # Apply filter button
         self.apply_filter_button = QPushButton("Apply Filters")
         self.apply_filter_button.clicked.connect(self.apply_filters)
@@ -158,6 +163,16 @@ class FilterWidget(QWidget):
 
         # In the future, I'm sure this will need some try/catching
         self.data_model.apply_filters(combined_filters)
+
+    def reset_filters(self):
+        """Reset all filters and update the data model."""
+        self.filters.clear()
+        # Remove all widgets from the filter layout
+        while self.filter_layout.count():
+            child = self.filter_layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+        self.data_model.reset_filters()
 
 if __name__ == "__main__":
     import sys
